@@ -13,21 +13,15 @@ char *tab;
 int shmid;
 
 void handler(int sig){
-    printf("\n\nFermeture du serveur...\n");
-    
-    int client_pid; 
-    memcpy(&client_pid, tab, sizeof(int));
-    printf("PID du client récupéré: %d\n", client_pid);
-    if(client_pid > 0){
-        printf("Envoi du signal au client (PID: %d)\n", client_pid);
-        kill(client_pid, SIGUSR1);
-        sleep(1);
-    }
+   printf("\nSignal reçu, fermeture du serveur...\n");
+    struct shmid_ds buf;
+    shmctl(shmid,IPC_STAT,&buf);
     
     shmdt(tab);
-    
-    shmctl(shmid, IPC_RMID, NULL);
-    printf("Mémoire partagée détruite\n");
+    if(buf.shm_nattch == 0){
+        shmctl(shmid, IPC_RMID, NULL);
+        printf("Mémoire partagée détruite\n");
+    }
     exit(EXIT_SUCCESS);
 }
 
